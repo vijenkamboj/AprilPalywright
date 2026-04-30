@@ -1,0 +1,16 @@
+[
+  {
+    "email": "vijen.kamboj@gmail.com",
+    "password": "India@2911",
+    "product": "Zara Coat 3",
+    "country": "India",
+    "confirmationMessage": "Thank you for your order"
+  },
+  {
+    "email": "anshika@gmail.com",
+    "password": "IamKing@000",
+    "product": "Nike Shoes",
+    "country": "USA",
+    "confirmationMessage": "Thank you for your order"
+  }
+]

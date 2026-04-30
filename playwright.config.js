@@ -44,6 +44,11 @@ export default defineConfig({
         },
         screenshot: "on",
         trace: "on",
+        video: "retain-on-failure",
+        reporter: [
+          ["list"], // keep default console output
+          ["allure-playwright", { outputFolder: "allure-results" }],
+        ],
       },
     },
 
