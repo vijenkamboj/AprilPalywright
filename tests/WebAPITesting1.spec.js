@@ -12,7 +12,7 @@ test.beforeAll(async () => {
       data: logindata,
     },
   );
-  expect(response.ok()).toBeTruthy(); //validating for 200 status code`
+  expect(response.status()).toBe(200); //validating for 200 status code`
   const loginResponse = await response.json(); //parses the HTTP response body into a JavaScript object.
   console.log(loginResponse);
   token = loginResponse.token;
