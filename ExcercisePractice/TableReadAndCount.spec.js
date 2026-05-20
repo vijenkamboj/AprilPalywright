@@ -16,8 +16,17 @@ test.describe("Table exercise", () => {
     const rows = page.locator("//tbody/tr");
     const rowCount = await page.locator("//tbody/tr").count();
     for (let i = 0; i < rowCount; i++) {
-      let lastName = await rows.nth(i).locator("td").nth(0).textContent(); //all rows and only one cell at 0
+      //Loops through every row — starting at 0,
+      // stopping before rowCount.
+      let lastName = await rows.nth(i).locator("td").nth(0).textContent();
+      //rows.nth(i) — picks the current row (e.g. row 0, row 1, row 2...)
+      // .locator("td") — finds all <td> cells inside that row
+      // .nth(0) — picks the first cell (Last Name column)
+      // .textContent() — gets the text out of it
+      //all rows and only one cell at 0
       let email = await rows.nth(i).locator("td").nth(2).textContent();
+      //The key insight is that .nth(i) on rows controls which row you're on, and .nth(0)
+      // .nth(2) on td controls which column/cell you're reading within that row.
       console.log(lastName);
       console.log(email);
     }
