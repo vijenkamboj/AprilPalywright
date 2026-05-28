@@ -28,4 +28,21 @@ customerTest.spec.js
       │
       ├── { page, customer }  →  customer = 11
       ├── page.goto(/users/11)  →  navigates UI with that ID
-      └── expect(parsedContent.id).toBe(11)  →  validates ✅ */
+      └── expect(parsedContent.id).toBe(11)  →  validates ✅ 
+      
+      tests/
+  ├── api/
+  │     ├── createCustomer.spec.js
+  │     ├── getToken.spec.js
+  │     └── orderValidation.spec.js
+  ├── ui/
+  │     ├── login.spec.js
+  │     ├── customerValidation.spec.js
+  │     └── dashboard.spec.js
+  └── fixtures/
+        ├── customerFixture.js
+        └── tokenFixture.js
+  └── utils/
+        ├── apiUtils.js
+        └── testData.js
+*/
