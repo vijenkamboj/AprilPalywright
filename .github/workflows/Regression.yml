@@ -1,0 +1,104 @@
+# .github/workflows/regression.yml
+# Runs on merge to main — full suite with 4 parallel shards (~20 min)
+
+name: 🔁 Regression Tests
+
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:
+    inputs:
+      environment:
+        description: 'Target environment'
+        type: choice
+        options: [dev, staging, prod]
+        default: staging
+
+env:
+  TEST_ENV:         ${{ inputs.environment || 'staging' }}
+  DEV_BASE_URL:     ${{ secrets.DEV_BASE_URL }}
+  STAGING_BASE_URL: ${{ secrets.STAGING_BASE_URL }}
+  PROD_BASE_URL:    ${{ secrets.PROD_BASE_URL }}
+  TEST_USERNAME:    ${{ secrets.TEST_USERNAME }}
+  TEST_PASSWORD:    ${{ secrets.TEST_PASSWORD }}
+
+jobs:
+  regression:
+    name: Regression — Shard ${{ matrix.shardIndex }}/${{ matrix.shardTotal }}
+    runs-on: ubuntu-latest
+    timeout-minutes: 40
+
+    strategy:
+      fail-fast: false             # don't cancel other shards if one fails
+      matrix:
+        shardIndex: [1, 2, 3, 4]
+        shardTotal: [4]
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: 'npm'
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Install Playwright browsers
+        run: npx playwright install --with-deps
+
+      - name: Run regression tests (shard ${{ matrix.shardIndex }}/${{ matrix.shardTotal }})
+        run: |
+          npx playwright test \
+            --config=playwright.regression.config.js \
+            --shard=${{ matrix.shardIndex }}/${{ matrix.shardTotal }}
+
+      - name: Upload blob report (for merging)
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: blob-report-${{ matrix.shardIndex }}
+          path: blob-report/
+          retention-days: 1
+
+  # Merge all shard reports into one HTML report
+  merge-reports:
+    name: Merge Reports
+    needs: regression
+    if: always()
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: 'npm'
+      - run: npm ci
+
+      - name: Download all blob reports
+        uses: actions/download-artifact@v4
+        with:
+          path: all-blob-reports
+          pattern: blob-report-*
+          merge-multiple: true
+
+      - name: Merge reports
+        run: npx playwright merge-reports --reporter html,junit ./all-blob-reports
+
+      - name: Upload merged HTML report
+        uses: actions/upload-artifact@v4
+        with:
+          name: regression-report-${{ github.run_id }}
+          path: playwright-report/
+          retention-days: 14
+
+      - name: Upload merged JUnit
+        uses: actions/upload-artifact@v4
+        with:
+          name: regression-junit-${{ github.run_id }}
+          path: test-results/
+          retention-days: 14
